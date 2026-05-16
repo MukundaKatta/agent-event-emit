@@ -1,0 +1,19 @@
+[package]
+name = "agent-event-emit"
+version = "0.1.0"
+edition = "2021"
+rust-version = "1.74"
+description = "Structured event emitter for agent runs. Append-only, JSON-line-serializable events with monotonic ids, run id, and timestamps. Zero deps beyond serde_json."
+authors = ["Mukunda Rao Katta <mukunda.vjcs6@gmail.com>"]
+license = "MIT OR Apache-2.0"
+repository = "https://github.com/MukundaKatta/agent-event-emit"
+homepage = "https://github.com/MukundaKatta/agent-event-emit"
+documentation = "https://docs.rs/agent-event-emit"
+readme = "README.md"
+keywords = ["agent", "event", "emit", "trace", "observability"]
+categories = ["data-structures"]
+exclude = [".github/*", "target/*"]
+
+[dependencies]
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
