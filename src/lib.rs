@@ -45,6 +45,13 @@ pub struct Event {
 
 impl Event {
     /// Serialize as one JSON line (no trailing newline).
+    ///
+    /// # Panics
+    ///
+    /// Panics only if serialization fails, which cannot happen for a
+    /// well-formed [`Event`]: every field is JSON-serializable and the
+    /// payload is already a [`serde_json::Value`].
+    #[must_use]
     pub fn to_json_line(&self) -> String {
         serde_json::to_string(self).expect("serialize Event")
     }
@@ -59,6 +66,7 @@ pub struct Emitter {
 
 impl Emitter {
     /// Build an emitter for `run_id`. First emit will have id=1.
+    #[must_use]
     pub fn new(run_id: impl Into<String>) -> Self {
         Self {
             run_id: run_id.into(),
@@ -81,19 +89,23 @@ impl Emitter {
     }
 
     /// Current run id.
+    #[must_use]
     pub fn run_id(&self) -> &str {
         &self.run_id
     }
 
     /// How many events have been emitted so far.
+    #[must_use]
     pub fn count(&self) -> u64 {
         self.next_id - 1
     }
 }
 
 fn now_ms() -> u64 {
-    SystemTime::now()
-        .duration_since(UNIX_EPOCH)
-        .map(|d| d.as_millis() as u64)
-        .unwrap_or(0)
+    match SystemTime::now().duration_since(UNIX_EPOCH) {
+        // `as_millis` returns u128; millis since the epoch fit in u64 for
+        // hundreds of millions of years, so the cast cannot truncate.
+        Ok(d) => u64::try_from(d.as_millis()).unwrap_or(u64::MAX),
+        Err(_) => 0,
+    }
 }

@@ -41,3 +41,28 @@ fn timestamps_are_present() {
     let ev = e.emit("k", json!({}));
     assert!(ev.ts_unix_ms > 1_700_000_000_000);
 }
+
+#[test]
+fn run_id_accessor_returns_supplied_id() {
+    let e = Emitter::new("run-accessor");
+    assert_eq!(e.run_id(), "run-accessor");
+}
+
+#[test]
+fn cloned_emitter_has_independent_counter() {
+    let mut e = Emitter::new("r");
+    e.emit("a", json!({}));
+    let mut cloned = e.clone();
+    // Both continue from the same point but advance independently.
+    assert_eq!(e.emit("b", json!({})).id, 2);
+    assert_eq!(cloned.emit("b", json!({})).id, 2);
+    assert_eq!(e.count(), 2);
+    assert_eq!(cloned.count(), 2);
+}
+
+#[test]
+fn kind_is_carried_into_event() {
+    let mut e = Emitter::new("r");
+    let ev = e.emit("llm_call", json!({}));
+    assert_eq!(ev.kind, "llm_call");
+}
